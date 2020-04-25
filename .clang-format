@@ -1,0 +1,7 @@
+# We'll use defaults from the LLVM style, but with 4 columns indentation.
+BasedOnStyle: WebKit
+IndentWidth: 4
+Language: Cpp
+DerivePointerAlignment: false
+PointerAlignment: Left
+ColumnLimit: 80
