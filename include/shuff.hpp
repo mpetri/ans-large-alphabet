@@ -132,7 +132,7 @@ inline size_t SHUFF_FINISH_OUTPUT(bit_io_t* bio)
 ** Routines for inputting bits
 ******************************************************************************/
 
-inline int64_t SHUFF_START_INPUT(bit_io_t* bio, const uint8_t*& f)
+inline void SHUFF_START_INPUT(bit_io_t* bio, const uint8_t*& f)
 {
     bio->in_u64 = (const uint64_t*)f;
     bio->buff_btg = SHUFF_BUFF_BITS;

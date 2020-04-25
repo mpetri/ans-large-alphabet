@@ -18,6 +18,7 @@ comp_stats_t reset_stats() {
     s.encode_bytes = 0;
     s.prelude_time_ns = 0;
     s.encode_time_ns = 0;
+    return s;
 }
 
 

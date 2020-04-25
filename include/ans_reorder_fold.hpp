@@ -111,17 +111,23 @@ struct ans_reorder_fold_encode {
     size_t serialize(uint8_t*& out_u8) {
         size_t no_except_thres = 1 << (fidelity+8-1);
         auto out_ptr_u32 = reinterpret_cast<uint32_t*>(out_u8);
+        size_t bytes_written = 0;
         if(sigma < no_except_thres) {
             *out_ptr_u32++ = 0;
+            bytes_written += sizeof(uint32_t);
         } else {
             *out_ptr_u32++ = 1;
+            bytes_written += sizeof(uint32_t);
             for(size_t i=0;i<no_except_thres;i++) {
                 *out_ptr_u32++ = most_frequent[i];
             }
             out_u8 += sizeof(uint32_t) * no_except_thres;
+            bytes_written += sizeof(uint32_t) * no_except_thres;
         }
         out_u8 += sizeof(uint32_t);
-        ans_serialize_interp(nfreqs,frame_size,out_u8);
+        bytes_written += sizeof(uint32_t);
+        auto interp_written_bytes = ans_serialize_interp(nfreqs,frame_size,out_u8);
+        return interp_written_bytes + bytes_written;
     }
 
     void encode_symbol(uint64_t& state,uint32_t sym,uint8_t*& out_u8) {

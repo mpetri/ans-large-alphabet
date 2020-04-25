@@ -44,27 +44,13 @@ po::variables_map parse_cmdargs(int argc, char const* argv[])
     return vm;
 }
 
-void rescale_freqs(std::vector<uint32_t>& scaled,const std::vector<uint64_t>& F,size_t M,size_t sigma,size_t freq_sum)
-{
-    double fratio = double(frame_size)/double(sigma);
-    for(int64_t i=sigma-1;i>=0;i--) {
-        double aratio = double(M)/double(freq_sum);
-        double ratio  = i*fratio/sigma + (sigma-i)*aratio/sigma;
-        S[i] = (uint32_t) (0.5 + ratio*F[i]);
-        if(S[i]==0)
-            S[i] = 1;
-        M -= S[i];
-        freq_sum -= F[i];
-    }
-}
-
 void
 rescale_freqs(std::vector<uint32_t>& in_u32,std::string name)
 {
     size_t m = in_u32.size();
 
     // (0) compute entropy
-    auto [input_entropy,sigma] = entropy(in_u32);
+    auto [input_entropy,sigma] = compute_entropy(in_u32);
 
     uint32_t max_sym = 0;
     for(size_t i=0;i<m;i++) {

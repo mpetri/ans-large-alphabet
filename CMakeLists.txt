@@ -17,18 +17,6 @@ include_directories(${CMAKE_SOURCE_DIR}/third-party/FastPFor/headers/)
 include_directories(${CMAKE_SOURCE_DIR}/third-party/streamvbyte/include/)
 include_directories(${CMAKE_SOURCE_DIR}/third-party/FiniteStateEntropy/lib/)
 
-# RLZ STUFF
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/include/)
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/external/googletest/include)
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/external/sdsl-lite/external/FastPFor/headers/)
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/external/easyloggingpp/src/)
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/external/lz4/lib)
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/external/zlib/)
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/external/brotli/enc/)
-include_directories(${CMAKE_SOURCE_DIR}/third-party/rlz-store/external/brotli/dec/)
-include_directories(${CMAKE_BINARY_DIR}/third-party/rlz-store/external/sdsl-lite/include)
-include_directories(${CMAKE_BINARY_DIR}/third-party/rlz-store/external/sdsl-lite/external/libdivsufsort/include/)
-
 add_library(FastPFor ${CMAKE_SOURCE_DIR}/third-party/FastPFor/src/bitpacking.cpp
                      ${CMAKE_SOURCE_DIR}/third-party/FastPFor/src/bitpackingaligned.cpp
                      ${CMAKE_SOURCE_DIR}/third-party/FastPFor/src/bitpackingunaligned.cpp
@@ -52,8 +40,6 @@ add_library(FiniteStateEntropy ${CMAKE_SOURCE_DIR}/third-party/FiniteStateEntrop
                      ${CMAKE_SOURCE_DIR}/third-party/FiniteStateEntropy/lib/huf_decompress.c)
 
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/rlz-store)
-
 # OUR BINS
 add_executable(benchmark.x src/benchmark.cpp)
 target_link_libraries(benchmark.x FastPFor streamvbyte FiniteStateEntropy ${Boost_LIBRARIES})
@@ -63,9 +49,6 @@ target_link_libraries(generate_inputs.x ${Boost_LIBRARIES})
 
 add_executable(generate_bwtmtf.x src/generate_bwtmtf.cpp)
 target_link_libraries(generate_bwtmtf.x ${Boost_LIBRARIES})
-
-add_executable(generate_rlz.x src/generate_rlz.cpp)
-target_link_libraries(generate_rlz.x sdsl pthread divsufsort divsufsort64 zlib lz4 bzip2 brotli lzma ${Boost_LIBRARIES})
 
 add_executable(shuff.x src/shuff.cpp)
 target_link_libraries(shuff.x  ${Boost_LIBRARIES})

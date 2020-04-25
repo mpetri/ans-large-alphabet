@@ -48,7 +48,7 @@ template <class t_compressor>
 void run(std::vector<uint32_t>& input,std::string input_name)
 {
     // (0) compute entropy
-    auto [input_entropy,sigma] = entropy(input);
+    auto [input_entropy,sigma] = compute_entropy(input);
 
 
     // (1) encode
@@ -137,7 +137,7 @@ int main(int argc, char const* argv[])
                 vec.push_back(input_u32s[i] & ((1ULL<<k)-1));
             }
 
-            auto [input_entropy,sigma] = entropy(vec);
+            auto [input_entropy,sigma] = compute_entropy(vec);
             printf("%s;%u;%u;%2.4f\n",short_name.c_str(),(unsigned int)sigma,(unsigned int)k,input_entropy);
         }
     }

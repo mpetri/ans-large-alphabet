@@ -49,7 +49,7 @@ struct ans_sint_encode {
     }
 
     size_t serialize(uint8_t*& out_u8) {
-        ans_serialize_interp(nfreqs,frame_size,out_u8);
+        return ans_serialize_interp(nfreqs,frame_size,out_u8);
     }
 
     void encode_symbol(uint64_t& state,uint32_t sym,uint8_t*& out_u8) {

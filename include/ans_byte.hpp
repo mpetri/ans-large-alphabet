@@ -108,6 +108,7 @@ struct ans_byte_encode {
         auto bytes_written = interpolative_internal::encode(out_ptr_u32,in_buf,constants::MAX_SIGMA,constants::MAX_FRAME_SIZE+constants::MAX_SIGMA);
 
         out_u8 += bytes_written;
+        return bytes_written;
     }
 
     void encode_symbol(uint64_t& state,uint8_t sym,uint8_t*& out_u8) {

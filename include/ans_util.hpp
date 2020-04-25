@@ -21,7 +21,7 @@ std::vector<uint32_t> ans_load_interp(const uint8_t* in_u8)
     return vec;
 }
 
-void ans_serialize_interp(std::vector<uint32_t>& vec,size_t frame_size,uint8_t*& out_u8)
+size_t ans_serialize_interp(std::vector<uint32_t>& vec,size_t frame_size,uint8_t*& out_u8)
 {
     uint32_t max_sym = vec.size()-1;
     vbyte_encode_u32(out_u8,max_sym);
@@ -35,6 +35,7 @@ void ans_serialize_interp(std::vector<uint32_t>& vec,size_t frame_size,uint8_t*&
     auto in_buf = increasing_freqs.data();
     auto bytes_written = interpolative_internal::encode(out_ptr_u32,in_buf,vec.size(),frame_size+vec.size()+1);
     out_u8 += bytes_written;
+    return bytes_written;
 }
 
 uint64_t next_power_of_two(uint64_t x)
