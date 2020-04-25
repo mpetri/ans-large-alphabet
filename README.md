@@ -39,13 +39,82 @@ run the following scripts to download and generate the data used in the paper:
 Running Experiments
 ----------------
 
+Each experiment in the paper can be reproduced using a self-contained binary. To generate Table 9 in the paper
+we run:
+
+```
+./build/table_effectiveness.x -t -i ./data/space/
+```
+
+which produces:
+
+```
+huff0  &
+4.1142  &
+    17.2938  &
+        16.7040  \\ 
+FSE  &
+0.7246  &
+    17.2717  &
+        16.6425  \\ 
+vbyte  &
+8.0000  &
+    15.7453  &
+        15.3139  \\ 
+OptPFor  &
+1.1059  &
+    12.2515  &
+        16.6003  \\ 
+shuff  &
+1.1104  &
+    12.1171  &
+        14.5248  \\ 
+arith  &
+0.5182  &
+    12.1559  &
+        14.9079  \\ 
+vbyteFSE  &
+0.5182  &
+    13.9537  &
+        13.8778  \\ 
+vbytehuff0  &
+1.1115  &
+    14.0030  &
+        13.8888  \\ 
+vbyteANS  &
+0.5280  &
+    13.9251  &
+        13.8560  \\ 
+ANS  &
+0.5182  &
+    12.1350  &
+        15.7338  \\ 
+ANSmsb  &
+0.5182  &
+    12.0094  &
+        13.4717  \\ 
+entropy  &
+0.5153  &
+    11.9693  &
+        12.0703  \\ 
+```
+
+The latex table from the paper (requiring some additional reformatting to get the exact).
+
+
+The main efficiency results table (Table 10) can be reproduced similarily:
+
+```
+./build/table_efficiency.x -t -i ./data/speed/
+```
 
 
 Code Overview
 ----------------
 
+The repository contains all the code necessary to reproduce the results in the paper. The table below provides an overview of the different files and what they implement:
 
-
-Results
--------
+| File | Description |
+| ---  | ---- |
+| shuff | A version of `https://github.com/turpinandrew/shuff` which implements "On the Implementation of Minimum-Redundancy Prefix Codes", IEEE Transactions on Communications, 45(10):1200-1207, October 1997, and "Housekeeping for Prefix Coding", IEEE Transactions on Communications, 48(4):622-628, April 2000. |
 

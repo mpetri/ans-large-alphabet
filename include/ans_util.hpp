@@ -109,7 +109,7 @@ adjust_freqs(const std::vector<uint64_t>& freqs,uint32_t largest_sym,bool requir
             scaled = prev;
             break;
         }
-        std::cout << "sigma=" << sigma << " m=" << freq_sum << " M=" << target_frame_size << " H=" << H << " XH=" << XH << " max_freq= " << max_norm_freq << std::endl;
+        //std::cout << "sigma=" << sigma << " m=" << freq_sum << " M=" << target_frame_size << " H=" << H << " XH=" << XH << " max_freq= " << max_norm_freq << std::endl;
         if( XH < threshold) {
             break;
         }

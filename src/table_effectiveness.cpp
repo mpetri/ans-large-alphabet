@@ -107,18 +107,19 @@ int main(int argc, char const* argv[])
         inputs.push_back(input);
     }
 
-    // run<entropy_only>(inputs);
+    run<huffzero>(inputs);
+    run<fse>(inputs);
+    run<vbyte>(inputs);
+    run<optpfor<128>>(inputs);
     run<shuff>(inputs);
     run<arith>(inputs);
-    // run<huffzero>(inputs);
-    // run<fse>(inputs);
-    // run<vbyte>(inputs);
-    // run<optpfor<128>>(inputs);
-    // run<vbytefse>(inputs);
-    // run<vbytehuffzero>(inputs);
-    // run<vbyteANS>(inputs);
-    // run<ANSint>(inputs);
-    // run<ANSmsb>(inputs);
+    run<vbytefse>(inputs);
+    run<vbytehuffzero>(inputs);
+    run<vbyteANS>(inputs);
+    run<ANSint>(inputs);
+    run<ANSmsb>(inputs);
+
+    run<entropy_only>(inputs);
 
     return EXIT_SUCCESS;
 }
