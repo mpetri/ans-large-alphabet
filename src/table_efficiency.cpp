@@ -136,20 +136,17 @@ int main(int argc, char const* argv[])
         inputs.push_back(input);
     }
 
-    // run<shuff>(inputs);
+    run<vbyte>(inputs);
+    run<vbytehuffzero>(inputs);
+    run<vbytefse>(inputs);
+    run<optpfor<128>>(inputs);
+    run<shuff>(inputs);
     run<arith>(inputs);
-    // run<huffzero>(inputs);
-    // run<fse>(inputs);
-    // run<vbyte>(inputs);
-    // run<optpfor<128>>(inputs);
-    // run<vbytefse>(inputs);
-    // run<vbytehuffzero>(inputs);
-    // run<vbyteANS>(inputs);
-    // run<ANSint>(inputs);
-    // run<ANSfold<1>>(inputs);
-    // run<ANSfold<5>>(inputs);
-    // run<ANSrfold<1>>(inputs);
-    // run<ANSrfold<5>>(inputs);
+    run<ANSint>(inputs);
+    run<ANSfold<1>>(inputs);
+    run<ANSfold<5>>(inputs);
+    run<ANSrfold<1>>(inputs);
+    run<ANSrfold<5>>(inputs);
 
     return EXIT_SUCCESS;
 }

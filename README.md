@@ -108,6 +108,24 @@ The main efficiency results table (Table 10) can be reproduced similarily:
 ./build/table_efficiency.x -t -i ./data/speed/
 ```
 
+which produces:
+
+```
+\method{vbyte}  &
+1636393388.9707  &  1087121953.3407  &
+     159013606.7943  &   130903074.1278  \\ 
+
+\method{vbytehuff0}  &
+ 394124393.5411  &   496583505.4823  &
+      90783067.5054  &    95368795.9022  \\ 
+
+\method{vbyteFSE}  &
+ 266113859.4759  &   342498595.7558  &
+      79023959.2742  &    89971829.8201  \\ 
+...
+```
+
+
 
 Code Overview
 ----------------
@@ -116,5 +134,9 @@ The repository contains all the code necessary to reproduce the results in the p
 
 | File | Description |
 | ---  | ---- |
-| shuff | A version of `https://github.com/turpinandrew/shuff` which implements "On the Implementation of Minimum-Redundancy Prefix Codes", IEEE Transactions on Communications, 45(10):1200-1207, October 1997, and "Housekeeping for Prefix Coding", IEEE Transactions on Communications, 48(4):622-628, April 2000. |
-
+| `shuff.hpp` | A version of `https://github.com/turpinandrew/shuff` which implements "On the Implementation of Minimum-Redundancy Prefix Codes", IEEE Transactions on Communications, 45(10):1200-1207, October 1997, and "Housekeeping for Prefix Coding", IEEE Transactions on Communications, 48(4):622-628, April 2000. |
+| `arith.hpp` | Implementation of a 56-bit arithmetic encoder and decoder pair that carries out semi-static compression of an input array of (in the encoder) strictly positive uint32_t values, not including zero. |
+| `ans_fold.hpp` | The "ans_fold" technique described in the paper |
+| `ans_int.hpp` | A large alphabet implementation of regular ANS coding. Called "ANS" in the paper |
+| `ans_reorder_fold.hpp` | The "ANSfold-X-r" technique which reorders the most frequent symbols to the front of the alphabet and stores the mapping in the prelude |
+| `methods.hpp.hpp` | Interfaces to all the different methods including the external library calls to the `streamvbyte`, `FiniteStateEntropy` and `FastPfor` libraries for fast `vbyte`, `huff0`, `FSE` and `OpfPFor` implementations |
