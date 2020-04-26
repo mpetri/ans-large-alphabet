@@ -32,8 +32,9 @@ Download and Generating the Data
 
 run the following scripts to download and generate the data used in the paper:
 
-1. `bash ./scripts/generate_data.sh` will generate the synthetic datasets into ./data/
-2. `bash ./scripts/download_data.sh` will download the remaining "real world" datasets into ./data/
+
+1. `bash ./scripts/download_data.sh` will download the "real world" datasets into ./data/
+2. `bash ./scripts/generate_data.sh` will generate the synthetic datasets into ./data/ and setup the directory structure to run all experiments
 
 
 Running Experiments
@@ -147,3 +148,4 @@ The repository contains all the code necessary to reproduce the results in the p
 | `pseudo_adaptive.cpp` | A block based ANS coder to used to create Figure 13 in the paper |
 | `ans_sint.hpp` | A version of the ANS coder in `ans_int.hpp` which supports different entropy approximation ratios used to create Figure 12 |
 | `ans_smsb.hpp` | A version of the ANS coder in `ans_fold.hpp` which supports different entropy approximation ratios used to create Figure 12 |
+| `fold_effectiveness.cpp` | Used to generate Figure 11 which allows changing the fidelity (f) for `ans_fold` and `ans_rfold` |

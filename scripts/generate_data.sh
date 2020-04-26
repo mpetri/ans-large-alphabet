@@ -1,6 +1,7 @@
 #!/bin/bash
 
-./build/generate_inputs.x -t -n 100000 -o ./data/
+# the paper uses n = 100M but 1M is faster...
+./build/generate_inputs.x -t -n 1000000 -o ./data/
 
 mkdir -p ./data/speed
 mkdir -p ./data/space
