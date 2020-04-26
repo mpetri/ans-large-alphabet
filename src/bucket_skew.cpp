@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -15,17 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 #include <iostream>
 #include <vector>
 
 #include "cutil.hpp"
-#include "util.hpp"
 #include "methods.hpp"
+#include "util.hpp"
 
-#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -60,35 +59,35 @@ po::variables_map parse_cmdargs(int argc, char const* argv[])
     return vm;
 }
 
-template<uint32_t fidelity>
-uint32_t compute_bucket(uint32_t x)
+template <uint32_t fidelity> uint32_t compute_bucket(uint32_t x)
 {
     const uint32_t radix = 8;
-    uint32_t radix_mask = ((1<<radix)-1);
+    uint32_t radix_mask = ((1 << radix) - 1);
     size_t offset = 0;
-    size_t thres = 1 << (fidelity+radix-1);
-    while(x >= thres) {
+    size_t thres = 1 << (fidelity + radix - 1);
+    while (x >= thres) {
         auto digit = x & radix_mask;
         x = x >> radix;
-        offset = offset + (1<<(fidelity-1)) * radix_mask;
+        offset = offset + (1 << (fidelity - 1)) * radix_mask;
     }
     return x + offset;
 }
 
-double kl_divergance(std::vector<double>& P,std::vector<double>& Q)
+double kl_divergance(std::vector<double>& P, std::vector<double>& Q)
 {
     double kl = 0.0;
-    for(size_t i=0;i<P.size();i++) {
-        if(P[i] != 0.0 && Q[i] != 0.0) kl += P[i] * log2(Q[i]/P[i]);
+    for (size_t i = 0; i < P.size(); i++) {
+        if (P[i] != 0.0 && Q[i] != 0.0)
+            kl += P[i] * log2(Q[i] / P[i]);
     }
     return -kl;
 }
 
-template<uint32_t fidelity>
-void compute_skew(std::vector<uint32_t>& input,std::string name)
+template <uint32_t fidelity>
+void compute_skew(std::vector<uint32_t>& input, std::string name)
 {
-    std::vector<uint32_t> bucket_map(1<<27);
-    for(size_t i=0;i<bucket_map.size();i++) {
+    std::vector<uint32_t> bucket_map(1 << 27);
+    for (size_t i = 0; i < bucket_map.size(); i++) {
         bucket_map[i] = compute_bucket<fidelity>(i);
     }
     std::vector<uint32_t> bucket_sizes;
@@ -97,10 +96,10 @@ void compute_skew(std::vector<uint32_t>& input,std::string name)
     uint32_t prev = bucket_map[0];
     bucket_min.push_back(0);
     auto cur_size = 1;
-    for(size_t i=1;i<bucket_map.size();i++) {
+    for (size_t i = 1; i < bucket_map.size(); i++) {
         auto cur = bucket_map[i];
-        if(cur != prev) {
-            bucket_max.push_back(i-1);
+        if (cur != prev) {
+            bucket_max.push_back(i - 1);
             bucket_min.push_back(i);
             bucket_sizes.push_back(cur_size);
             cur_size = 0;
@@ -108,48 +107,44 @@ void compute_skew(std::vector<uint32_t>& input,std::string name)
         cur_size++;
         prev = cur;
     }
-    if(cur_size) {
-        bucket_max.push_back(bucket_map.size()-1);
+    if (cur_size) {
+        bucket_max.push_back(bucket_map.size() - 1);
         bucket_sizes.push_back(cur_size);
     }
 
     std::vector<uint32_t> bucket_usage(bucket_sizes.size());
-    for(size_t i=0;i<input.size();i++) {
+    for (size_t i = 0; i < input.size(); i++) {
         auto bucket_id = compute_bucket<fidelity>(input[i]);
         bucket_usage[bucket_id]++;
     }
 
     std::vector<std::vector<double>> real_dists(bucket_sizes.size());
-    for(size_t i=0;i<input.size();i++) {
+    for (size_t i = 0; i < input.size(); i++) {
         auto bucket_id = compute_bucket<fidelity>(input[i]);
-        if(real_dists[bucket_id].size()==0)
+        if (real_dists[bucket_id].size() == 0)
             real_dists[bucket_id].resize(bucket_sizes[bucket_id]);
         auto bucket_offset = input[i] - bucket_min[bucket_id];
         real_dists[bucket_id][bucket_offset] += 1.0;
     }
     size_t usage_cum_sum = 0;
-    for(size_t i=0;i<bucket_sizes.size();i++) {
-        if(bucket_usage[i]!=0) {
-            double bits_uniform = - log2(double(1.0)/double(bucket_sizes[i]));
+    for (size_t i = 0; i < bucket_sizes.size(); i++) {
+        if (bucket_usage[i] != 0) {
+            double bits_uniform = -log2(double(1.0) / double(bucket_sizes[i]));
             double bits_real = 0.0;
-            for(size_t j=0;j<real_dists[i].size();j++) {
-                if(real_dists[i][j] != 0.0) {
-                    double bits = - log2(real_dists[i][j]/double(bucket_usage[i]));
+            for (size_t j = 0; j < real_dists[i].size(); j++) {
+                if (real_dists[i][j] != 0.0) {
+                    double bits
+                        = -log2(real_dists[i][j] / double(bucket_usage[i]));
                     bits_real += real_dists[i][j] * bits;
                 }
             }
             bits_real /= double(bucket_usage[i]);
             usage_cum_sum += bucket_usage[i];
-            std::cout << name << ";"
-                    << i << ";"
-                    << fidelity << ";"
-                    << bucket_min[i] << ";"
-                    << bucket_max[i] << ";"
-                    << bucket_sizes[i] << ";"
-                    << bucket_usage[i] << ";"
-                    << usage_cum_sum << ";"
-                    << input.size() << ";"
-                    << (bits_uniform - bits_real) << std::endl;
+            std::cout << name << ";" << i << ";" << fidelity << ";"
+                      << bucket_min[i] << ";" << bucket_max[i] << ";"
+                      << bucket_sizes[i] << ";" << bucket_usage[i] << ";"
+                      << usage_cum_sum << ";" << input.size() << ";"
+                      << (bits_uniform - bits_real) << std::endl;
         }
     }
 }
@@ -159,24 +154,28 @@ int main(int argc, char const* argv[])
     auto cmdargs = parse_cmdargs(argc, argv);
     auto input_dir = cmdargs["input"].as<std::string>();
 
-    boost::regex input_file_filter( ".*\\.u32" );
+    boost::regex input_file_filter(".*\\.u32");
     if (cmdargs.count("text")) {
-        input_file_filter = boost::regex( ".*\\.txt" );
+        input_file_filter = boost::regex(".*\\.txt");
     }
 
     // single file also works!
     boost::filesystem::path p(input_dir);
     if (boost::filesystem::is_regular_file(p)) {
-        input_file_filter = boost::regex( p.filename().string() );
+        input_file_filter = boost::regex(p.filename().string());
         input_dir = p.parent_path().string();
     }
 
-    boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
-    for( boost::filesystem::directory_iterator i( input_dir ); i != end_itr; ++i )
-    {
-        if( !boost::filesystem::is_regular_file( i->status() ) ) continue;
+    boost::filesystem::directory_iterator
+        end_itr; // Default ctor yields past-the-end
+    for (boost::filesystem::directory_iterator i(input_dir); i != end_itr;
+         ++i) {
+        if (!boost::filesystem::is_regular_file(i->status()))
+            continue;
         boost::smatch what;
-        if( !boost::regex_match( i->path().filename().string(), what, input_file_filter ) ) continue;
+        if (!boost::regex_match(
+                i->path().filename().string(), what, input_file_filter))
+            continue;
 
         std::string file_name = i->path().string();
         std::vector<uint32_t> input_u32s;
@@ -187,12 +186,12 @@ int main(int argc, char const* argv[])
         }
         std::string short_name = i->path().stem().string();
 
-        compute_skew<1>(input_u32s,short_name);
-        compute_skew<2>(input_u32s,short_name);
-        compute_skew<3>(input_u32s,short_name);
-        compute_skew<4>(input_u32s,short_name);
-        compute_skew<5>(input_u32s,short_name);
-        compute_skew<6>(input_u32s,short_name);
+        compute_skew<1>(input_u32s, short_name);
+        compute_skew<2>(input_u32s, short_name);
+        compute_skew<3>(input_u32s, short_name);
+        compute_skew<4>(input_u32s, short_name);
+        compute_skew<5>(input_u32s, short_name);
+        compute_skew<6>(input_u32s, short_name);
     }
 
     return EXIT_SUCCESS;

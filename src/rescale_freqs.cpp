@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -15,22 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
+#include <algorithm>
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 #include "cutil.hpp"
-#include "util.hpp"
 #include "methods.hpp"
+#include "util.hpp"
 
-#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
-
 
 po::variables_map parse_cmdargs(int argc, char const* argv[])
 {
@@ -62,33 +60,31 @@ po::variables_map parse_cmdargs(int argc, char const* argv[])
     return vm;
 }
 
-void
-rescale_freqs(std::vector<uint32_t>& in_u32,std::string name)
+void rescale_freqs(std::vector<uint32_t>& in_u32, std::string name)
 {
     size_t m = in_u32.size();
 
     // (0) compute entropy
-    auto [input_entropy,sigma] = compute_entropy(in_u32);
+    auto [input_entropy, sigma] = compute_entropy(in_u32);
 
     uint32_t max_sym = 0;
-    for(size_t i=0;i<m;i++) {
-        max_sym = std::max(in_u32[i],max_sym);
+    for (size_t i = 0; i < m; i++) {
+        max_sym = std::max(in_u32[i], max_sym);
     }
-    std::vector<std::pair<int64_t,uint32_t>> freqs(max_sym+1,{0,0});
-    for(size_t i=0;i<m;i++) {
+    std::vector<std::pair<int64_t, uint32_t>> freqs(max_sym + 1, { 0, 0 });
+    for (size_t i = 0; i < m; i++) {
         freqs[in_u32[i]].first--;
         freqs[in_u32[i]].second = in_u32[i];
     }
 
-    std::sort(freqs.begin(),freqs.end());
-
+    std::sort(freqs.begin(), freqs.end());
 
     std::vector<uint32_t> F(sigma);
-    for(size_t i=0;i<sigma;i++) {
-        F[i] = - freqs[i].first;
+    for (size_t i = 0; i < sigma; i++) {
+        F[i] = -freqs[i].first;
     }
     size_t frame_factor = 1;
-    while(frame_factor < 32) {
+    while (frame_factor < 32) {
         std::vector<uint32_t> S(sigma);
         size_t frame_size = sigma * frame_factor;
         if (!is_power_of_two(frame_size)) {
@@ -96,53 +92,50 @@ rescale_freqs(std::vector<uint32_t>& in_u32,std::string name)
         }
         size_t init_M = frame_size;
         int64_t in_len = m;
-        double fratio = double(frame_size)/double(m);
-        for(int64_t i=sigma-1;i>=0;i--) {
-            double aratio = double(frame_size)/double(in_len);
-            double ratio  = i*fratio/sigma + (sigma-i)*aratio/sigma;
-            S[i] = (uint32_t) (0.5 + ratio*F[i]);
-            if(S[i]==0)
+        double fratio = double(frame_size) / double(m);
+        for (int64_t i = sigma - 1; i >= 0; i--) {
+            double aratio = double(frame_size) / double(in_len);
+            double ratio = i * fratio / sigma + (sigma - i) * aratio / sigma;
+            S[i] = (uint32_t)(0.5 + ratio * F[i]);
+            if (S[i] == 0)
                 S[i] = 1;
             frame_size -= S[i];
             in_len -= F[i];
         }
 
         // compute prelude
-        std::vector<uint32_t> prelude(max_sym+1,0);
-        for(size_t i=0;i<sigma;i++) {
+        std::vector<uint32_t> prelude(max_sym + 1, 0);
+        for (size_t i = 0; i < sigma; i++) {
             auto mapped_sym = freqs[i].second;
             prelude[mapped_sym] = S[i];
         }
-        std::vector<uint32_t> increasing_freqs(max_sym+1);
+        std::vector<uint32_t> increasing_freqs(max_sym + 1);
         increasing_freqs[0] = prelude[0];
-        for(size_t sym=1;sym<max_sym;sym++) {
-            increasing_freqs[sym] = increasing_freqs[sym-1] +  prelude[sym] + 1;
+        for (size_t sym = 1; sym < max_sym; sym++) {
+            increasing_freqs[sym]
+                = increasing_freqs[sym - 1] + prelude[sym] + 1;
         }
         auto prelude_buf = increasing_freqs.data();
-        std::vector<uint32_t> out_buf(init_M+max_sym*2);
-        auto bytes_written = interpolative_internal::encode(out_buf.data(),prelude_buf,max_sym+1,init_M+max_sym) + 8;
+        std::vector<uint32_t> out_buf(init_M + max_sym * 2);
+        auto bytes_written = interpolative_internal::encode(out_buf.data(),
+                                 prelude_buf, max_sym + 1, init_M + max_sym)
+            + 8;
         double prelude_bits = bytes_written * 8;
         double prelude_bpi = prelude_bits / double(m);
 
-        auto XH = cross_entropy(F,S);
-        double inefficiency = 100.0*(XH-input_entropy)/input_entropy;
+        auto XH = cross_entropy(F, S);
+        double inefficiency = 100.0 * (XH - input_entropy) / input_entropy;
 
-        double inefficiency2 = 100.0*((XH+prelude_bpi)-input_entropy)/input_entropy;
+        double inefficiency2
+            = 100.0 * ((XH + prelude_bpi) - input_entropy) / input_entropy;
 
-        printf("%-15s\tM=%-12d\tH0=%2.2f\tXH=%2.2f\tINEFF=%2.2f\tPRELUDE_BPI=%2.2f\tTOTAL_BPI=%2.2f\tTOTAL_INEFF=%2.2f\n",
-                name.c_str(),
-                (int)init_M,
-                input_entropy,
-                XH,
-                inefficiency,
-                prelude_bpi,
-                XH+prelude_bpi,
-                inefficiency2
-            );
+        printf("%-15s\tM=%-12d\tH0=%2.2f\tXH=%2.2f\tINEFF=%2.2f\tPRELUDE_BPI=%"
+               "2.2f\tTOTAL_BPI=%2.2f\tTOTAL_INEFF=%2.2f\n",
+            name.c_str(), (int)init_M, input_entropy, XH, inefficiency,
+            prelude_bpi, XH + prelude_bpi, inefficiency2);
         fflush(stdout);
         frame_factor++;
     }
-
 }
 
 int main(int argc, char const* argv[])
@@ -150,24 +143,28 @@ int main(int argc, char const* argv[])
     auto cmdargs = parse_cmdargs(argc, argv);
     auto input_dir = cmdargs["input"].as<std::string>();
 
-    boost::regex input_file_filter( ".*\\.u32" );
+    boost::regex input_file_filter(".*\\.u32");
     if (cmdargs.count("text")) {
-        input_file_filter = boost::regex( ".*\\.txt" );
+        input_file_filter = boost::regex(".*\\.txt");
     }
 
     // single file also works!
     boost::filesystem::path p(input_dir);
     if (boost::filesystem::is_regular_file(p)) {
-        input_file_filter = boost::regex( p.filename().string() );
+        input_file_filter = boost::regex(p.filename().string());
         input_dir = p.parent_path().string();
     }
 
-    boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
-    for( boost::filesystem::directory_iterator i( input_dir ); i != end_itr; ++i )
-    {
-        if( !boost::filesystem::is_regular_file( i->status() ) ) continue;
+    boost::filesystem::directory_iterator
+        end_itr; // Default ctor yields past-the-end
+    for (boost::filesystem::directory_iterator i(input_dir); i != end_itr;
+         ++i) {
+        if (!boost::filesystem::is_regular_file(i->status()))
+            continue;
         boost::smatch what;
-        if( !boost::regex_match( i->path().filename().string(), what, input_file_filter ) ) continue;
+        if (!boost::regex_match(
+                i->path().filename().string(), what, input_file_filter))
+            continue;
 
         std::string file_name = i->path().string();
         std::vector<uint32_t> input_u32s;
@@ -178,8 +175,7 @@ int main(int argc, char const* argv[])
         }
         std::string short_name = i->path().stem().string();
 
-        rescale_freqs(input_u32s,short_name);
-
+        rescale_freqs(input_u32s, short_name);
     }
 
     return EXIT_SUCCESS;

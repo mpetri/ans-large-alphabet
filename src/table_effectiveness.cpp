@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -15,17 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 #include <iostream>
 #include <vector>
 
 #include "cutil.hpp"
-#include "util.hpp"
 #include "methods.hpp"
+#include "util.hpp"
 
-#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -68,21 +67,24 @@ void run(std::vector<std::vector<uint32_t>>& inputs)
     std::cout << t_compressor::name() << "  &" << std::endl;
 
     std::vector<double> BPIs;
-    for(const auto& input : inputs) {
-        std::vector<uint8_t> encoded_data(input.size()*8);
-        std::vector<uint8_t> tmp_buf(input.size()*8);
-        auto encoded_bytes = t_compressor::encode(input.data(),input.size(),encoded_data.data(),encoded_data.size(),tmp_buf.data());
-        double BPI = double(encoded_bytes*8) / double(input.size());
+    for (const auto& input : inputs) {
+        std::vector<uint8_t> encoded_data(input.size() * 8);
+        std::vector<uint8_t> tmp_buf(input.size() * 8);
+        auto encoded_bytes = t_compressor::encode(input.data(), input.size(),
+            encoded_data.data(), encoded_data.size(), tmp_buf.data());
+        double BPI = double(encoded_bytes * 8) / double(input.size());
         BPIs.push_back(BPI);
     }
 
-    for(size_t i=0;i<BPIs.size();i++) {
-        for(size_t j=0;j<i*4;j++) printf(" ");
-        printf("%2.4f  ",BPIs[i]);
-        if(i+1==BPIs.size()) printf("\\\\ \n");
-        else printf("&\n");
+    for (size_t i = 0; i < BPIs.size(); i++) {
+        for (size_t j = 0; j < i * 4; j++)
+            printf(" ");
+        printf("%2.4f  ", BPIs[i]);
+        if (i + 1 == BPIs.size())
+            printf("\\\\ \n");
+        else
+            printf("&\n");
     }
-
 }
 
 int main(int argc, char const* argv[])
@@ -90,9 +92,9 @@ int main(int argc, char const* argv[])
     auto cmdargs = parse_cmdargs(argc, argv);
     auto input_dir = cmdargs["input"].as<std::string>();
 
-    boost::regex input_file_filter( ".*\\.u32" );
+    boost::regex input_file_filter(".*\\.u32");
     if (cmdargs.count("text")) {
-        input_file_filter = boost::regex( ".*\\.txt" );
+        input_file_filter = boost::regex(".*\\.txt");
     }
 
     std::vector<std::string> input_files;
@@ -100,28 +102,34 @@ int main(int argc, char const* argv[])
     // single file also works!
     boost::filesystem::path p(input_dir);
     if (boost::filesystem::is_regular_file(p)) {
-        input_file_filter = boost::regex( p.filename().string() );
+        input_file_filter = boost::regex(p.filename().string());
         input_dir = p.parent_path().string();
     }
 
-    boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
-    for( boost::filesystem::directory_iterator i( input_dir ); i != end_itr; ++i )
-    {
-        if( !boost::filesystem::is_regular_file( i->status() ) ) continue;
+    boost::filesystem::directory_iterator
+        end_itr; // Default ctor yields past-the-end
+    for (boost::filesystem::directory_iterator i(input_dir); i != end_itr;
+         ++i) {
+        if (!boost::filesystem::is_regular_file(i->status()))
+            continue;
         boost::smatch what;
-        if( !boost::regex_match( i->path().filename().string(), what, input_file_filter ) ) continue;
+        if (!boost::regex_match(
+                i->path().filename().string(), what, input_file_filter))
+            continue;
 
         std::string file_name = i->path().string();
         input_files.push_back(file_name);
     }
 
-    std::sort(input_files.begin(),input_files.end());
+    std::sort(input_files.begin(), input_files.end());
 
     std::vector<std::vector<uint32_t>> inputs;
-    for(auto input_file : input_files) {
+    for (auto input_file : input_files) {
         std::vector<uint32_t> input;
-        if(cmdargs.count("text")) input = read_file_text(input_file);
-        else input = read_file_u32(input_file);
+        if (cmdargs.count("text"))
+            input = read_file_text(input_file);
+        else
+            input = read_file_u32(input_file);
         inputs.push_back(input);
     }
 

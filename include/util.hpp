@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -17,17 +17,16 @@
 
 #pragma once
 
-
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdarg>
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <type_traits>
 #include <unordered_map>
-#include <cmath>
-#include <algorithm>
-#include <numeric>
 
 #include "constants.hpp"
 
@@ -158,7 +157,6 @@ std::vector<uint8_t> read_file_u8(std::string file_name)
     return content;
 }
 
-
 std::vector<uint32_t> read_file_text(std::string file_name)
 {
     std::vector<uint32_t> content;
@@ -196,62 +194,63 @@ std::vector<uint32_t> read_file_u32(std::string file_name)
 void compact_alphabet(std::vector<uint32_t>& vec)
 {
     uint32_t max_elem = *std::max_element(vec.begin(), vec.end());
-    std::vector<uint8_t> elems(max_elem+1);
-    for(const auto& v : vec) elems[v] = 1;
+    std::vector<uint8_t> elems(max_elem + 1);
+    for (const auto& v : vec)
+        elems[v] = 1;
     uint32_t cur = 0;
-    for(auto& v : elems) {
-        if(v != 0) {
+    for (auto& v : elems) {
+        if (v != 0) {
             v = cur;
             cur++;
         }
     }
-    for(auto& x : vec) x = elems[x];
+    for (auto& x : vec)
+        x = elems[x];
 }
 
 void probability_sort(std::vector<uint32_t>& vec)
 {
     uint32_t max_elem = *std::max_element(vec.begin(), vec.end());
-    std::vector<std::pair<int64_t,uint64_t>> elems(max_elem+1);
-    for(size_t i=0;i<elems.size();i++) {
+    std::vector<std::pair<int64_t, uint64_t>> elems(max_elem + 1);
+    for (size_t i = 0; i < elems.size(); i++) {
         elems[i].second = i;
         elems[i].first = 0;
     }
-    for(const auto& v : vec) elems[v].first--;
-    std::sort(elems.begin(),elems.end());
-    std::vector<uint32_t> remap(max_elem+1);
-    for(size_t i=0;i<elems.size();i++) {
+    for (const auto& v : vec)
+        elems[v].first--;
+    std::sort(elems.begin(), elems.end());
+    std::vector<uint32_t> remap(max_elem + 1);
+    for (size_t i = 0; i < elems.size(); i++) {
         remap[elems[i].second] = i;
     }
-    for(auto& x : vec) x = remap[x]+1;
+    for (auto& x : vec)
+        x = remap[x] + 1;
 }
 
-void
-write_file_text(std::vector<uint32_t>& nums,std::string file_name)
+void write_file_text(std::vector<uint32_t>& nums, std::string file_name)
 {
     std::vector<uint32_t> content;
     auto fd = fopen_or_fail(file_name, "w");
-    for(auto& num : nums) {
-        fprintf(fd,"%u\n",num);
+    for (auto& num : nums) {
+        fprintf(fd, "%u\n", num);
     }
     fclose_or_fail(fd);
 }
 
-void
-write_file_u32(std::vector<uint32_t>& nums,std::string file_name)
+void write_file_u32(std::vector<uint32_t>& nums, std::string file_name)
 {
     auto f = fopen_or_fail(file_name, "wb");
-    auto ret = fwrite(nums.data(),sizeof(uint32_t),nums.size(),f);
+    auto ret = fwrite(nums.data(), sizeof(uint32_t), nums.size(), f);
     if (ret != nums.size()) {
         quit("reading file content failed: %d", ret);
     }
     fclose_or_fail(f);
 }
 
-
-std::pair<double,size_t> compute_entropy(const uint32_t* input,size_t n)
+std::pair<double, size_t> compute_entropy(const uint32_t* input, size_t n)
 {
     std::unordered_map<uint32_t, uint64_t> freqs;
-    for (size_t i=0;i<n;i++) {
+    for (size_t i = 0; i < n; i++) {
         uint32_t num = input[i];
         freqs[num] += 1;
     }
@@ -261,22 +260,20 @@ std::pair<double,size_t> compute_entropy(const uint32_t* input,size_t n)
         double p = double(c.second) / nn;
         H0 += (p * log2(p));
     }
-    return {-H0,freqs.size()};
+    return { -H0, freqs.size() };
 }
 
-std::pair<double,size_t> compute_entropy(std::vector<uint32_t>& input)
+std::pair<double, size_t> compute_entropy(std::vector<uint32_t>& input)
 {
-    return compute_entropy(input.data(),input.size());
+    return compute_entropy(input.data(), input.size());
 }
 
-
-template<class X>
-double entropy(const std::vector<X>& freqs,size_t freqs_sum)
+template <class X> double entropy(const std::vector<X>& freqs, size_t freqs_sum)
 {
     double H0 = 0.0;
     double n = freqs_sum;
     for (const auto& f : freqs) {
-        if(f != 0) {
+        if (f != 0) {
             double p = double(f) / n;
             H0 += (p * log2(p));
         }
@@ -284,14 +281,14 @@ double entropy(const std::vector<X>& freqs,size_t freqs_sum)
     return -H0;
 }
 
-template<class X,class Y>
-double cross_entropy(const std::vector<X>& P,const std::vector<Y>& Q)
+template <class X, class Y>
+double cross_entropy(const std::vector<X>& P, const std::vector<Y>& Q)
 {
     double H0 = 0.0;
-    double n = std::accumulate(std::begin(P),std::end(P), 0);
-    double m = std::accumulate(std::begin(Q),std::end(Q), 0);
-    for (size_t i=0;i<P.size();i++) {
-        if(P[i] != 0 && Q[i] != 0) {
+    double n = std::accumulate(std::begin(P), std::end(P), 0);
+    double m = std::accumulate(std::begin(Q), std::end(Q), 0);
+    for (size_t i = 0; i < P.size(); i++) {
+        if (P[i] != 0 && Q[i] != 0) {
             double p = double(P[i]) / n;
             double q = double(Q[i]) / m;
             H0 += (p * log2(q));
@@ -300,14 +297,14 @@ double cross_entropy(const std::vector<X>& P,const std::vector<Y>& Q)
     return -H0;
 }
 
-double compute_mips(size_t num_ints,size_t num_ns)
+double compute_mips(size_t num_ints, size_t num_ns)
 {
     double million_ints = double(num_ints) / 1000000.0;
     double seconds = double(num_ns) / double(1e9);
     return million_ints / seconds;
 }
 
-double compute_ips(size_t num_ints,size_t num_ns)
+double compute_ips(size_t num_ints, size_t num_ns)
 {
     double seconds = double(num_ns) / double(1e9);
     return double(num_ints) / seconds;

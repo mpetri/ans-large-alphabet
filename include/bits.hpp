@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,7 +20,7 @@
 // taken from sdsl-lite
 
 namespace bits {
-constexpr static uint32_t all_set{ 0xFFFFFFFFULL };
+constexpr static uint32_t all_set { 0xFFFFFFFFULL };
 
 static const uint32_t lo_set[33] = { 0x00000000ULL, 0x00000001ULL,
     0x00000003ULL, 0x00000007ULL, 0x0000000FULL, 0x0000001FULL, 0x0000003FULL,

@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -43,32 +43,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-#define printint(msg, val) \
-    fprintf(stderr, "%-18s = %10d\n", msg, (int)(val))
-#define printdbl(msg, val) \
+#define printint(msg, val) fprintf(stderr, "%-18s = %10d\n", msg, (int)(val))
+#define printdbl(msg, val)                                                     \
     fprintf(stderr, "%-18s = %10.3f\n", msg, (double)(val))
 
-#define DU64(x) \
-    printf("  line %3d: %5s = %016llx\n", __LINE__, #x, x)
-#define DU32(x) \
-    printf("  line %3d: %5s =         %08lx\n", __LINE__, #x, x)
-#define DU08(x) \
+#define DU64(x) printf("  line %3d: %5s = %016llx\n", __LINE__, #x, x)
+#define DU32(x) printf("  line %3d: %5s =         %08lx\n", __LINE__, #x, x)
+#define DU08(x)                                                                \
     printf("  line %3d: %5s =               %02x\n", __LINE__, #x, x)
-#define DI64(x) \
-    printf("  line %3d: %5s =         %8ld\n", __LINE__, #x, x)
-#define DI32(x) \
-    printf("  line %3d: %5s =         %8d\n", __LINE__, #x, x)
+#define DI64(x) printf("  line %3d: %5s =         %8ld\n", __LINE__, #x, x)
+#define DI32(x) printf("  line %3d: %5s =         %8d\n", __LINE__, #x, x)
 
-size_t
-byte_encode(uint8_t* obuff, size_t osize,
-    uint64_t v, uint64_t max)
+size_t byte_encode(uint8_t* obuff, size_t osize, uint64_t v, uint64_t max)
 {
     int op = 0;
     max--; /* working here with zero-origin values */
     v--;
     while (max) {
-        //myassert(op < osize);
+        // myassert(op < osize);
         obuff[op++] = v & 255;
         v >>= 8;
         max >>= 8;
@@ -76,16 +68,15 @@ byte_encode(uint8_t* obuff, size_t osize,
     return op;
 }
 
-size_t
-byte_decode(const uint8_t* ibuff, size_t isize,
-    uint64_t max, uint64_t* v)
+size_t byte_decode(
+    const uint8_t* ibuff, size_t isize, uint64_t max, uint64_t* v)
 {
     size_t ip = 0;
     uint64_t newv = 0;
     int offset = 0;
     max--; /* working here with zero-origin values */
     while (max) {
-        //myassert(ip < isize);
+        // myassert(ip < isize);
         newv += (((uint64_t)ibuff[ip++]) << offset);
         max >>= 8;
         offset += 8;
@@ -95,9 +86,8 @@ byte_decode(const uint8_t* ibuff, size_t isize,
 }
 
 /* use the byte-aligned interp mechanism to code the entire integer buffer
-*/
-size_t interp_compress(
-    uint8_t* obuff, /* output buffer */
+ */
+size_t interp_compress(uint8_t* obuff, /* output buffer */
     size_t osize, /* output buffer size */
     const uint32_t* ibuff, /* input buffer */
     size_t isize)
@@ -133,8 +123,7 @@ size_t interp_compress(
 /* decode an entire buffer of byte codes to regenerate the initial
    sequence of 32-bit integers that was the original input
 */
-size_t interp_decompress(
-    uint32_t* obuff, /* output buffer */
+size_t interp_decompress(uint32_t* obuff, /* output buffer */
     size_t osize, /* number symbols to be decoded */
     const uint8_t* ibuff, /* input buffer */
     size_t isize)
@@ -171,43 +160,45 @@ size_t interp_decompress(
 #define FULLBYTE 255
 #define PART ((1LL << (BBITS - 8)))
 #define ZERO (0)
-#define MINR ((1LL<<(BBITS-15)))
+#define MINR ((1LL << (BBITS - 15)))
 #define TBTS 31 /* at this stage, cannot be larger than 31 because of F */
 #define PREL_RECURSE 1000
 
 /* count through the input array, building a resizing array containing
    symbol frequency counts, including zero for symbols that don't appear
 */
-std::vector<uint32_t> count_freqs(const uint32_t* ibuff, size_t isize, size_t* maxv)
+std::vector<uint32_t> count_freqs(
+    const uint32_t* ibuff, size_t isize, size_t* maxv)
 {
     uint32_t newmax = 0;
-    std::vector<uint32_t> F(1024,0);
+    std::vector<uint32_t> F(1024, 0);
     for (size_t i = 0; i < isize; i++) {
         uint32_t v = ibuff[i] + 1;
         if (v >= F.size()) {
             auto cur_size = F.size();
-            F.resize(v+1);
-            for(size_t j=cur_size;j<F.size();j++) F[j] = 0;
+            F.resize(v + 1);
+            for (size_t j = cur_size; j < F.size(); j++)
+                F[j] = 0;
         }
-        newmax = std::max(newmax,v);
+        newmax = std::max(newmax, v);
         F[v]++;
     }
     *maxv = newmax;
-	size_t total = 0;
-	for (uint32_t i=1; i<=newmax; i++) {
-		total += F[i];
-	}
+    size_t total = 0;
+    for (uint32_t i = 1; i <= newmax; i++) {
+        total += F[i];
+    }
 
-	/* now downsample the frequency array if required, to ensure that
-	   total size is less than 2^28
-	*/
-	while (total > MINR) {
-		total = 0;
-		for (uint32_t i=1; i<=newmax; i++) {
-			F[i] = (F[i]+1)>>1;
-			total += F[i];
-		}
-	}
+    /* now downsample the frequency array if required, to ensure that
+       total size is less than 2^28
+    */
+    while (total > MINR) {
+        total = 0;
+        for (uint32_t i = 1; i <= newmax; i++) {
+            F[i] = (F[i] + 1) >> 1;
+            total += F[i];
+        }
+    }
     /* return the array that got constructed */
     return F;
 }
@@ -216,51 +207,50 @@ std::vector<uint32_t> count_freqs(const uint32_t* ibuff, size_t isize, size_t* m
    power of two, to avoid the division in the encoder and one of the two
    divisions in the decoder
 */
-uint64_t
-scale_counts(std::vector<uint32_t>& F, size_t maxv, int silent) {
-	size_t power;
-	double ratio;
-	size_t maxsym;
-	uint64_t total;
-	int i;
-	power = TBTS;
-	total = 0;
-	for (i=1; i<=maxv; i++) {
-		/* shift from 1-origin back to 0-origin */
-		F[i]--;
-		total += F[i];
-	}
-	ratio = ((double)(1LL<<power))/total;
+uint64_t scale_counts(std::vector<uint32_t>& F, size_t maxv, int silent)
+{
+    size_t power;
+    double ratio;
+    size_t maxsym;
+    uint64_t total;
+    int i;
+    power = TBTS;
+    total = 0;
+    for (i = 1; i <= maxv; i++) {
+        /* shift from 1-origin back to 0-origin */
+        F[i]--;
+        total += F[i];
+    }
+    ratio = ((double)(1LL << power)) / total;
 
-	/* do the adjustment, tracking the new total and also locating the
-	   most probable symbol */
-	maxsym = 1;
-	total = 0;
-	for (i=1; i<=maxv; i++) {
-		/* these are still offset by 1 after the interp step */
-		F[i] = F[i]*ratio;
-		total += F[i];
-		if (F[i]>F[maxsym]) {
-			maxsym = i;
-		}
-	}
-	/* allocate the leftover remainder as a bonus to the MFS */
-	F[maxsym] += (1LL<<power)-total;
-	return (1LL<<power);
+    /* do the adjustment, tracking the new total and also locating the
+       most probable symbol */
+    maxsym = 1;
+    total = 0;
+    for (i = 1; i <= maxv; i++) {
+        /* these are still offset by 1 after the interp step */
+        F[i] = F[i] * ratio;
+        total += F[i];
+        if (F[i] > F[maxsym]) {
+            maxsym = i;
+        }
+    }
+    /* allocate the leftover remainder as a bonus to the MFS */
+    F[maxsym] += (1LL << power) - total;
+    return (1LL << power);
 }
 
 /* encode a supplied array of ints to an output array of bytes
-*/
-size_t arith_compress(
-    uint8_t* obuff, /* output buffer */
+ */
+size_t arith_compress(uint8_t* obuff, /* output buffer */
     size_t osize, /* output buffer size */
     const uint32_t* ibuff, /* input buffer */
     size_t isize)
 { /* input buffer size */
 
     /* returns the number of bytes written to the output buffer,
-	   fails/exits if output buffer is too small, provided that
-	   //myassertion() in enabled */
+           fails/exits if output buffer is too small, provided that
+           //myassertion() in enabled */
 
     /* state variables for encoding */
     uint64_t L = ZERO;
@@ -272,35 +262,34 @@ size_t arith_compress(
 
     int first = 1;
     size_t op = 0;
-    size_t maxv, nunq=0;
+    size_t maxv, nunq = 0;
 
     /* count the frequencies of the provided symbols */
     auto F = count_freqs(ibuff, isize, &maxv);
 
     /* adjust the counts to allow the interpolative encoder to work */
     for (size_t i = 0; i <= maxv; i++) {
-        nunq += (F[i]>0);
+        nunq += (F[i] > 0);
         F[i]++;
     }
 
     /* now code the prelude into the output buffer */
     op += byte_encode(obuff + op, osize - op, maxv, (1LL << 31));
-    op += byte_encode(obuff+op, osize-op, nunq, (1LL<<31));
+    op += byte_encode(obuff + op, osize - op, nunq, (1LL << 31));
 
-	if (nunq<PREL_RECURSE) {
-		/* small enough that inefficient approach is ok */
-		op += interp_compress(obuff+op, osize-op, F.data(), maxv+1);
-	} else {
-		/* or else, ta-daa, recursive call for prelude... */
-		op += arith_compress(obuff+op, osize-op, F.data(), maxv+1);
-	}
+    if (nunq < PREL_RECURSE) {
+        /* small enough that inefficient approach is ok */
+        op += interp_compress(obuff + op, osize - op, F.data(), maxv + 1);
+    } else {
+        /* or else, ta-daa, recursive call for prelude... */
+        op += arith_compress(obuff + op, osize - op, F.data(), maxv + 1);
+    }
 
-
-	/* and now scale them up to get total to be a power of two */
-	total = scale_counts(F, maxv, 0);
+    /* and now scale them up to get total to be a power of two */
+    total = scale_counts(F, maxv, 0);
 
     /* bit ugly to have this next output line coming from here,
-	   but will do for now */
+           but will do for now */
     /* and turn the adjusted counts in F into cumulative array */
     F[0] = 0;
     for (size_t i = 1; i <= maxv; i++) {
@@ -308,7 +297,7 @@ size_t arith_compress(
     }
 
     /* now encode the array of symbols using the fixed array F to
-	   control probability estimation, one at a time */
+           control probability estimation, one at a time */
     for (size_t i = 0; i < isize; i++) {
         v = ibuff[i] + 1;
 
@@ -317,7 +306,7 @@ size_t arith_compress(
         high = F[v];
 
         /* this is the actual arithmetic coding step */
-        scale = R>>TBTS;
+        scale = R >> TBTS;
         L += low * scale;
         if (high < total) {
             /* top symbol gets beneit of rounding gaps */
@@ -329,8 +318,8 @@ size_t arith_compress(
         /* now sort out the carry/renormalization process */
         if (L > FULL) {
             /* lower bound has overflowed, need first to push
-			   a carry through the ff bytes and into the pending
-			   non-ff byte */
+                           a carry through the ff bytes and into the pending
+                           non-ff byte */
             last_non_ff_byte += 1;
             L &= FULL;
             while (num_ff_bytes > 0) {
@@ -343,7 +332,7 @@ size_t arith_compress(
         /* more normal type of renorm step */
         while (R < PART) {
             /* can output (or rather, save for later output)
-			   a byte from the front of L */
+                           a byte from the front of L */
             byte = (L >> (BBITS - 8));
             if (byte != FULLBYTE) {
                 /* not ff, so can bring everything up to date */
@@ -387,8 +376,7 @@ size_t arith_compress(
 /* decode the supplied array of bytes and regenerate the original array
    of strictly positive integers
 */
-size_t arith_decompress(
-    uint32_t* obuff, /* output buffer */
+size_t arith_decompress(uint32_t* obuff, /* output buffer */
     size_t osize, /* number symbols to be decoded */
     const uint8_t* ibuff, /* input buffer */
     size_t isize)
@@ -409,22 +397,21 @@ size_t arith_decompress(
     /* fetch the prelude */
     ip += byte_decode(ibuff + ip, isize - ip, (1LL << 31), &target);
     maxv = target;
-    ip += byte_decode(ibuff+ip, isize-ip, (1LL<<31), &target);
+    ip += byte_decode(ibuff + ip, isize - ip, (1LL << 31), &target);
     nunq = target;
 
-    std::vector<uint32_t> F(maxv+1,0);
+    std::vector<uint32_t> F(maxv + 1, 0);
 
-	if (nunq<PREL_RECURSE) {
-		/* small enough that inefficient approach is ok */
-		ip += interp_decompress(F.data(), maxv+1, ibuff+ip, isize-ip);
-	} else {
-		/* or else, tadaa, recursive call for prelude... */
-		ip += arith_decompress(F.data(), maxv+1, ibuff+ip, isize-ip);
-	}
+    if (nunq < PREL_RECURSE) {
+        /* small enough that inefficient approach is ok */
+        ip += interp_decompress(F.data(), maxv + 1, ibuff + ip, isize - ip);
+    } else {
+        /* or else, tadaa, recursive call for prelude... */
+        ip += arith_decompress(F.data(), maxv + 1, ibuff + ip, isize - ip);
+    }
 
-
-	/* adjust and scale the counts like the encoder did */
-	total = scale_counts(F, maxv, 1);
+    /* adjust and scale the counts like the encoder did */
+    total = scale_counts(F, maxv, 1);
 
     /* convert to cumulative sums */
     F[0] = 0;
@@ -442,12 +429,13 @@ size_t arith_decompress(
     /* and decode the required symbols one by one */
     for (op = 0; op < osize; op++) {
         /* decode target */
-        scale = R>>TBTS;
+        scale = R >> TBTS;
         target = D / scale;
 
         /* beware of the rounding that might accrue at the top of the
-		   range, and adjust downward if required */
-        if (target>=total) target = total-1;
+                   range, and adjust downward if required */
+        if (target >= total)
+            target = total - 1;
         /* binary search in F for target is a little faster */
         {
             int lo = 0, hi = maxv;
@@ -465,8 +453,8 @@ size_t arith_decompress(
         }
 
         /* (could also take leading bits of target to index a table
-		   and accelerate the search, leave that for another day)
-		*/
+                   and accelerate the search, leave that for another day)
+                */
         obuff[op] = v - 1;
 
         /* adjust, tracing the encoder, with D=V-L throughout */
@@ -480,7 +468,7 @@ size_t arith_decompress(
         }
 
         while (R < PART) {
-            if(ip >= isize) {
+            if (ip >= isize) {
                 std::cerr << "I/O error" << std::endl;
                 exit(EXIT_FAILURE);
             }

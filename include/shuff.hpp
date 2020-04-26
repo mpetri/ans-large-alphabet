@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,7 +16,6 @@
 // under the License.
 
 #pragma once
-
 
 #ifdef RECORD_STATS
 #include "stats.hpp"
@@ -29,8 +28,9 @@
 #define SHUFF_LOG2_MAX_SYMBOL SHUFF_LOG2_MAX_SYMBOL_NUMBER
 #define SHUFF_MAX_SYMBOL SHUFF_MAX_SYMBOL_NUMBER
 #else
-#define SHUFF_LOG2_MAX_SYMBOL 27 /* must be < sizeof(ulong)*8 - SHUFF_LOG2_L   \
-                                  */
+#define SHUFF_LOG2_MAX_SYMBOL                                                  \
+    27 /* must be < sizeof(ulong)*8 - SHUFF_LOG2_L                             \
+        */
 #define SHUFF_MAX_SYMBOL (1 << SHUFF_LOG2_MAX_SYMBOL)
 #endif
 
@@ -91,10 +91,7 @@ inline size_t SHUFF_BYTES_WRITTEN(bit_io_t* bio)
     return full_bytes + partial;
 }
 
-inline void SHUFF_OUTPUT_NEXT(bit_io_t* bio)
-{
-    bio->out_u64++;
-}
+inline void SHUFF_OUTPUT_NEXT(bit_io_t* bio) { bio->out_u64++; }
 
 inline void SHUFF_OUTPUT_BIT(bit_io_t* bio, int64_t b)
 {
@@ -403,9 +400,9 @@ uint64_t shuff_one_pass_freq_count(const uint32_t* input_u32,
 
     n = 0;
     for (cup = input_u32; cup < input_u32 + input_size; cup++) {
-        if (freq[*cup+1] == 0)
-            syms[n++] = *cup+1;
-        freq[*cup+1]++;
+        if (freq[*cup + 1] == 0)
+            syms[n++] = *cup + 1;
+        freq[*cup + 1]++;
     }
     freq[0] = 1;
     syms[n++] = 0;
@@ -644,7 +641,6 @@ void shuff_build_canonical_arrays(uint64_t* cw_lens, uint64_t max_cw_length)
             *q = (*pp) << left_shift;
     for (p = cw_lens + 1, q = shuff_lj_base; *p == 0; p++, q++)
         *q = SHUFF_MAX_ULONG;
-
 }
 
 /*
@@ -657,8 +653,8 @@ void shuff_build_canonical_arrays(uint64_t* cw_lens, uint64_t max_cw_length)
 ** SIDE EFFECTS: syms[0..max_symbol] is overwritten with canonical code mapping.
 **               cw_lens[] is destroyed.
 */
-void shuff_generate_mapping(uint64_t* cw_lens, uint64_t* syms,
-    uint64_t* freq, uint64_t max_cw_length, uint64_t n)
+void shuff_generate_mapping(uint64_t* cw_lens, uint64_t* syms, uint64_t* freq,
+    uint64_t max_cw_length, uint64_t n)
 {
     int64_t i;
 
@@ -754,16 +750,15 @@ inline size_t shuff_compress(uint8_t* out_u8, size_t out_size_u8,
     /* find max_symbol and check range*/
     max_symbol = 0;
     for (up = input_u32; up < input_u32 + input_size; up++) {
-        if (*up+1 > max_symbol)
-            max_symbol = *up+1;
-        SHUFF_CHECK_SYMBOL_RANGE(*up+1);
+        if (*up + 1 > max_symbol)
+            max_symbol = *up + 1;
+        SHUFF_CHECK_SYMBOL_RANGE(*up + 1);
     }
 
     n = shuff_one_pass_freq_count(
         input_u32, input_size, freqs, syms, max_symbol);
 
     shuff_build_codes(&bio, syms, freqs, n);
-
 
 #ifdef RECORD_STATS
     auto stop_prelude = std::chrono::high_resolution_clock::now();
@@ -772,14 +767,15 @@ inline size_t shuff_compress(uint8_t* out_u8, size_t out_size_u8,
 #endif
 
     for (up = input_u32; up < input_u32 + input_size; up++)
-        shuff_output(&bio, *up+1, syms, freqs);
+        shuff_output(&bio, *up + 1, syms, freqs);
 
     free(freqs);
     free(syms);
 
 #ifdef RECORD_STATS
     auto stop_compress = std::chrono::high_resolution_clock::now();
-    get_stats().encode_bytes = SHUFF_BYTES_WRITTEN(&bio) - get_stats().prelude_bytes;
+    get_stats().encode_bytes
+        = SHUFF_BYTES_WRITTEN(&bio) - get_stats().prelude_bytes;
     get_stats().encode_time_ns = (stop_compress - stop_prelude).count();
 #endif
 
@@ -887,7 +883,7 @@ void shuff_decompress(
         currcode += shuff_offset[currlen - 1];
 
         // subtract the one added in encoding
-        *out_u32++ = mapping[currcode]-1; // we add 1 to everything we encode
+        *out_u32++ = mapping[currcode] - 1; // we add 1 to everything we encode
 
         code <<= currlen;
         bits_needed = currlen;

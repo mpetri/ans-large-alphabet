@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -15,20 +15,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 #include <iostream>
 #include <vector>
 
 #define RECORD_STATS 1
 
 #include "cutil.hpp"
-#include "util.hpp"
 #include "methods.hpp"
 #include "stats.hpp"
+#include "util.hpp"
 
-#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -68,24 +67,28 @@ int main(int argc, char const* argv[])
     auto cmdargs = parse_cmdargs(argc, argv);
     auto input_dir = cmdargs["input"].as<std::string>();
 
-    boost::regex input_file_filter( ".*\\.u32" );
+    boost::regex input_file_filter(".*\\.u32");
     if (cmdargs.count("text")) {
-        input_file_filter = boost::regex( ".*\\.txt" );
+        input_file_filter = boost::regex(".*\\.txt");
     }
 
     // single file also works!
     boost::filesystem::path p(input_dir);
     if (boost::filesystem::is_regular_file(p)) {
-        input_file_filter = boost::regex( p.filename().string() );
+        input_file_filter = boost::regex(p.filename().string());
         input_dir = p.parent_path().string();
     }
 
-    boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
-    for( boost::filesystem::directory_iterator i( input_dir ); i != end_itr; ++i )
-    {
-        if( !boost::filesystem::is_regular_file( i->status() ) ) continue;
+    boost::filesystem::directory_iterator
+        end_itr; // Default ctor yields past-the-end
+    for (boost::filesystem::directory_iterator i(input_dir); i != end_itr;
+         ++i) {
+        if (!boost::filesystem::is_regular_file(i->status()))
+            continue;
         boost::smatch what;
-        if( !boost::regex_match( i->path().filename().string(), what, input_file_filter ) ) continue;
+        if (!boost::regex_match(
+                i->path().filename().string(), what, input_file_filter))
+            continue;
 
         std::string file_name = i->path().string();
         std::vector<uint32_t> input_u32s;
@@ -97,8 +100,8 @@ int main(int argc, char const* argv[])
         std::string short_name = i->path().stem().string();
 
         uint32_t max_sigma = 0;
-        for(auto x : input_u32s)
-            max_sigma = std::max(x,max_sigma);
+        for (auto x : input_u32s)
+            max_sigma = std::max(x, max_sigma);
 
         std::cout << short_name << "\t    " << max_sigma << std::endl;
     }

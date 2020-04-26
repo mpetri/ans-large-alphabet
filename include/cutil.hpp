@@ -5,9 +5,9 @@
 // to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,22 +34,22 @@ void REQUIRE_EQUAL(
     for (size_t i = 0; i < n; i++) {
         if (a[i] != b[i]) {
             errors++;
-            if(errors == 5) {
+            if (errors == 5) {
                 quit("%s not equal at position %lu/%lu -> expected=%u is=%u",
-                name.c_str(), i, n - 1, a[i], b[i]);
+                    name.c_str(), i, n - 1, a[i], b[i]);
             } else {
-                fprintf(stderr,"%s not equal at position %lu/%lu -> expected=%u is=%u\n",
-                name.c_str(), i, n - 1, a[i], b[i]);
+                fprintf(stderr,
+                    "%s not equal at position %lu/%lu -> expected=%u is=%u\n",
+                    name.c_str(), i, n - 1, a[i], b[i]);
             }
         }
     }
-    if(errors != 0) {
+    if (errors != 0) {
         quit("NOT EQUAL!");
     }
 }
 
-bool REQUIRE_EQUAL(
-    const uint32_t* a, const uint32_t* b, size_t n)
+bool REQUIRE_EQUAL(const uint32_t* a, const uint32_t* b, size_t n)
 {
     for (size_t i = 0; i < n; i++) {
         if (a[i] != b[i]) {
