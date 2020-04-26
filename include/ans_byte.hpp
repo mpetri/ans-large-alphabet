@@ -1,3 +1,21 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+// A byte based ANS entropy coder
 #pragma once
 
 #include "ans_util.hpp"
@@ -18,7 +36,7 @@ struct enc_entry {
     uint64_t sym_upper_bound;
 };
 
-
+// Normalize the frequencies so the frame is a power of two
 std::array<uint16_t, constants::MAX_SIGMA>
 adjust_freqs(const std::array<uint64_t, constants::MAX_SIGMA>& freqs)
 {
@@ -200,6 +218,7 @@ struct ans_byte_decode {
     std::vector<dec_entry> table;
 };
 
+// Compress the the input byte stream. Run 4 states in parallel
 size_t
 ans_byte_compress(void* dst, size_t dstCapacity,const void* src, size_t srcSize)
 {
@@ -238,6 +257,7 @@ ans_byte_compress(void* dst, size_t dstCapacity,const void* src, size_t srcSize)
     return out_u8 - reinterpret_cast<uint8_t*>(dst);
 }
 
+// decompress the ANS stream. Run 4 states in parallel
 void ans_byte_decompress(void* dst,  size_t to_decode,const void* cSrc, size_t cSrcSize)
 {
     auto in_u8 = reinterpret_cast<const uint8_t*>(cSrc);

@@ -9,7 +9,7 @@ A. Trotman (2014), Compression, SIMD, and Postings Lists. In Proceedings of the 
 
 taken from: http://www.cs.otago.ac.nz/homepages/andrew/papers/QMX.zip
 
-modified by Matthias Petrito align to u32 boundaries
+modified by Matthias Petri to align to u32 boundaries
 
 */
 /*

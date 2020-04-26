@@ -1,4 +1,19 @@
-#pragma once
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 #pragma once
 
@@ -18,6 +33,9 @@ struct enc_entry_fold {
     uint64_t sym_upper_bound;
 };
 
+
+// maps a 32-bit integer to a reduced address space based on the fidelity parameter
+// this is not veryefficient as we mainly care about decoding speed
 template<uint32_t fidelity>
 uint32_t ans_fold_mapping(uint32_t x)
 {
@@ -112,6 +130,7 @@ struct dec_entry_fold {
     uint32_t mapped_num;
 };
 
+// undo the fold mapping in a branchless way
 uint32_t ans_fold_undo_mapping(const dec_entry_fold& entry, const uint8_t*& in_u8)
 {
     uint32_t except_bytes = entry.mapped_num >> 30;
@@ -124,6 +143,7 @@ uint32_t ans_fold_undo_mapping(const dec_entry_fold& entry, const uint8_t*& in_u
     return num;
 }
 
+// undo the fold mapping 
 template<uint32_t fidelity>
 uint32_t ans_fold_undo_mapping(uint32_t x_plus_offset)
 {
@@ -137,6 +157,8 @@ uint32_t ans_fold_undo_mapping(uint32_t x_plus_offset)
     return x_org<<(radix*output_bytes);
 }
 
+
+// count the number of bytes we have to insert into the byte stream due to the mapping
 template<uint32_t fidelity>
 uint32_t ans_fold_exception_bytes(uint32_t x_plus_offset)
 {

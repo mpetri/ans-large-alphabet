@@ -1,3 +1,20 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 #include <iostream>
 #include <vector>
 
@@ -150,45 +167,38 @@ int main(int argc, char const* argv[])
         run<ANSsint<160>>(input_u32s,short_name);
         run<ANSsint<320>>(input_u32s,short_name);
 
-        // run<ANSmsb>(input_u32s,short_name);
-        // run<ANSint>(input_u32s,short_name);
-        // //run<shuff>(input_u32s,short_name);
-        // run<arith>(input_u32s,short_name);
+        run<ANSmsb>(input_u32s,short_name);
+        run<ANSint>(input_u32s,short_name);
+        run<shuff>(input_u32s,short_name);
+        run<arith>(input_u32s,short_name);
 
-        // run<ANSfold<1>>(input_u32s,short_name);
-        // run<ANSfold<2>>(input_u32s,short_name);
-        // run<ANSfold<3>>(input_u32s,short_name);
-        // run<ANSfold<4>>(input_u32s,short_name);
+        run<ANSfold<1>>(input_u32s,short_name);
+        run<ANSfold<2>>(input_u32s,short_name);
+        run<ANSfold<3>>(input_u32s,short_name);
+        run<ANSfold<4>>(input_u32s,short_name);
 
-        // run<ANSrfold<1>>(input_u32s,short_name);
-        // run<ANSrfold<2>>(input_u32s,short_name);
-        // run<ANSrfold<3>>(input_u32s,short_name);
-        // run<ANSrfold<4>>(input_u32s,short_name);
+        run<ANSrfold<1>>(input_u32s,short_name);
+        run<ANSrfold<2>>(input_u32s,short_name);
+        run<ANSrfold<3>>(input_u32s,short_name);
+        run<ANSrfold<4>>(input_u32s,short_name);
 
-        // run<ANSfold<5>>(input_u32s,short_name);
-        // run<ANSfold<6>>(input_u32s,short_name);
-        // run<ANSfold<7>>(input_u32s,short_name);
-        // run<ANSfold<8>>(input_u32s,short_name);
+        run<ANSfold<5>>(input_u32s,short_name);
+        run<ANSfold<6>>(input_u32s,short_name);
+        run<ANSfold<7>>(input_u32s,short_name);
+        run<ANSfold<8>>(input_u32s,short_name);
 
-        // run<ANSrfold<5>>(input_u32s,short_name);
-        // // run<ANSrfold<6>>(input_u32s,short_name);
-        // // // run<ANSrfold<7>>(input_u32s,short_name);
+        run<shuff>(input_u32s,short_name);
 
-        // run<ANSfold<5>>(input_u32s,short_name);
-        // run<ANSfold<6>>(input_u32s,short_name);
-        // run<ANSfold<7>>(input_u32s,short_name);
-        // run<shuff>(input_u32s,short_name);
-
-        // run<vbyte>(input_u32s,short_name);
-        // run<optpfor<128>>(input_u32s,short_name);
-        // run<streamvbyte>(input_u32s,short_name);
-        // run<huffzero>(input_u32s,short_name);
-        // run<fse>(input_u32s,short_name);
-        // run<vbytefse>(input_u32s,short_name);
-        // run<streamvbytefse>(input_u32s,short_name);
-        // run<vbytehuffzero>(input_u32s,short_name);
-        // run<streamvbyteANS>(input_u32s,short_name);
-        // run<vbyteANS>(input_u32s,short_name);
+        run<vbyte>(input_u32s,short_name);
+        run<optpfor<128>>(input_u32s,short_name);
+        run<streamvbyte>(input_u32s,short_name);
+        run<huffzero>(input_u32s,short_name);
+        run<fse>(input_u32s,short_name);
+        run<vbytefse>(input_u32s,short_name);
+        run<streamvbytefse>(input_u32s,short_name);
+        run<vbytehuffzero>(input_u32s,short_name);
+        run<streamvbyteANS>(input_u32s,short_name);
+        run<vbyteANS>(input_u32s,short_name);
     }
 
     return EXIT_SUCCESS;

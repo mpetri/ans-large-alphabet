@@ -137,6 +137,13 @@ The repository contains all the code necessary to reproduce the results in the p
 | `shuff.hpp` | A version of `https://github.com/turpinandrew/shuff` which implements "On the Implementation of Minimum-Redundancy Prefix Codes", IEEE Transactions on Communications, 45(10):1200-1207, October 1997, and "Housekeeping for Prefix Coding", IEEE Transactions on Communications, 48(4):622-628, April 2000. |
 | `arith.hpp` | Implementation of a 56-bit arithmetic encoder and decoder pair that carries out semi-static compression of an input array of (in the encoder) strictly positive uint32_t values, not including zero. |
 | `ans_fold.hpp` | The "ans_fold" technique described in the paper |
+| `ans_msb.hpp` | The "ans_fold" technique was generalized from a previous paper which was called `ans_msb` which is equivalent to `ans_fold_1` |
 | `ans_int.hpp` | A large alphabet implementation of regular ANS coding. Called "ANS" in the paper |
 | `ans_reorder_fold.hpp` | The "ANSfold-X-r" technique which reorders the most frequent symbols to the front of the alphabet and stores the mapping in the prelude |
-| `methods.hpp.hpp` | Interfaces to all the different methods including the external library calls to the `streamvbyte`, `FiniteStateEntropy` and `FastPfor` libraries for fast `vbyte`, `huff0`, `FSE` and `OpfPFor` implementations |
+| `methods.hpp` | Interfaces to all the different methods including the external library calls to the `streamvbyte`, `FiniteStateEntropy` and `FastPfor` libraries for fast `vbyte`, `huff0`, `FSE` and `OpfPFor` implementations |
+| `generate_*.cpp` | Generate different datasets used in the paper |
+| `interp.hpp` | A version of interpolative coding: `Alistair Moffat, Lang Stuiver: Binary Interpolative Coding for Effective Index Compression. Inf. Retr. 3(1): 25-47 (2000)` used for prelude compression. | 
+| `ans_util.hpp` | Various ANS utility function shared across different ANS implementations in this repository | 
+| `pseudo_adaptive.cpp` | A block based ANS coder to used to create Figure 13 in the paper |
+| `ans_sint.hpp` | A version of the ANS coder in `ans_int.hpp` which supports different entropy approximation ratios used to create Figure 12 |
+| `ans_smsb.hpp` | A version of the ANS coder in `ans_fold.hpp` which supports different entropy approximation ratios used to create Figure 12 |
