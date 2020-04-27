@@ -246,7 +246,7 @@ size_t ans_fold_compress(
     // serialize model
     ans_frame.serialize(out_u8);
 
-    // start encoding
+    // start encoding, we encode 4 states at the same time for speed
     std::array<uint64_t, 4> states;
     states[0] = ans_frame.initial_state();
     states[1] = ans_frame.initial_state();

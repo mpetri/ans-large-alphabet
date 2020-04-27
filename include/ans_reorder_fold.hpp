@@ -63,6 +63,9 @@ uint16_t ans_reorder_fold_mapping_and_exceptions(
     return x + offset;
 }
 
+// here we reorder the most frequent symbols in the input to the front
+// so our mapping procedure performs better as it expects a decreasing
+// frequency distribution: f_1 >= f_2 >= f_3 etc.
 template <uint32_t fidelity> struct ans_reorder_fold_encode {
     static ans_reorder_fold_encode create(const uint32_t* in_u32, size_t n)
     {

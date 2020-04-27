@@ -15,6 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+
+// this is a one file version of  which can be found here: https://github.com/turpinandrew/shuff
+
 #pragma once
 
 #ifdef RECORD_STATS

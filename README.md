@@ -4,7 +4,7 @@ Large-Alphabet Semi-Static Entropy Coding Via Asymmetric Numeral Systems
 This repository is the code released in conjunction of with the following paper:
 
 `
-Alistair Moffat, Matthias Petri: Large-Alphabet Semi-Static Entropy Coding Via Asymmetric Numeral Systems. ACM Transactions on Information Systems
+Alistair Moffat, Matthias Petri: Large-Alphabet Semi-Static Entropy Coding Via Asymmetric Numeral Systems. ACM Transactions on Information Systems, doi: 10.1145/3397175
 `
 
 which implements several integer list coding schemes which utilise ANS entropy coders.

@@ -20,6 +20,8 @@
 #include "interp.hpp"
 #include "vbyte.hpp"
 
+
+// load prelude from byte stream using vbyte and interp
 std::vector<uint32_t> ans_load_interp(const uint8_t* in_u8)
 {
     uint32_t max_sym = vbyte_decode_u32(in_u8);
@@ -39,6 +41,8 @@ std::vector<uint32_t> ans_load_interp(const uint8_t* in_u8)
     return vec;
 }
 
+
+// store prelude in byte stream using vbyte and interp
 size_t ans_serialize_interp(
     std::vector<uint32_t>& vec, size_t frame_size, uint8_t*& out_u8)
 {
@@ -69,6 +73,7 @@ uint64_t next_power_of_two(uint64_t x)
 
 bool is_power_of_two(uint64_t x) { return ((x != 0) && !(x & (x - 1))); }
 
+// scale a frequency distribution to a fixed frame size M
 bool scale_freqs(std::vector<uint32_t>& S, const std::vector<uint64_t>& F,
     std::vector<uint32_t>& mapping, int64_t M, size_t sigma, size_t freq_sum)
 {
@@ -89,6 +94,9 @@ bool scale_freqs(std::vector<uint32_t>& S, const std::vector<uint64_t>& F,
     return M != 0;
 }
 
+// scale frequencies by reducing frame size to the smallest power of two
+// such that the cross entropy between the scaled and true distribution
+// is smaller than H_approx/1000 away from the true dist
 std::vector<uint32_t> adjust_freqs(const std::vector<uint64_t>& freqs,
     uint32_t largest_sym, bool require_u16, uint32_t H_approx = 1)
 {
@@ -127,6 +135,9 @@ std::vector<uint32_t> adjust_freqs(const std::vector<uint64_t>& freqs,
         }
         auto max_norm_freq = *std::max_element(scaled.begin(), scaled.end());
         auto XH = cross_entropy(freqs, scaled);
+
+        // we want all freqs to be less than u16::max to have a compact
+        // frame representation
         if (require_u16 && max_norm_freq >= u16_limit) {
             // std::cout << "abort due to u16 overflow" << std::endl;
             scaled = prev;
